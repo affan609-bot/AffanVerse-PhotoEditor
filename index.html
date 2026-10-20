@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AffanVerse Photo Editor — Crop, Cut & Enhance</title>
+  <link rel="icon" type="image/jpeg" href="/affanverse-logo.jpg">
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo">
+        <img src="/affanverse-logo.jpg" alt="AffanVerse Logo" class="logo-img">
+        <span>Affan Verse</span>
+      </div>
+
+      <input type="file" id="file-input" accept="image/*" style="display: none;">
+      <button class="btn btn-primary" id="btn-open-file" title="Open Image from Computer (Ctrl+O)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span>Open</span>
+      </button>
+
+      <button class="btn" id="btn-samples-menu" title="Load Ready-to-Edit Sample Photos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span>Samples ▾</span>
+      </button>
+
+      <div class="dropdown-menu" id="samples-dropdown">
+        <div class="dropdown-item" data-sample="sunset">
+          <span>🌄 Mountain Sunset</span>
+        </div>
+        <div class="dropdown-item" data-sample="cyberpunk">
+          <span>🌆 Cyberpunk City</span>
+        </div>
+        <div class="dropdown-item" data-sample="tropical">
+          <span>🌺 Tropical Flower</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center History & Compare Controls -->
+    <div class="header-center">
+      <div class="btn-group">
+        <button class="btn btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+        </button>
+        <button class="btn btn-icon" id="btn-redo" title="Redo (Ctrl+Y)" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+        </button>
+      </div>
+
+      <button class="btn btn-compare" id="btn-compare" title="Click & Hold to preview original image">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="2" x2="12" y2="22"></line>
+        </svg>
+        <span>Hold to Compare</span>
+      </button>
+
+      <button class="btn btn-danger" id="btn-reset-all" title="Revert all changes to original photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 2v6h6"></path>
+          <path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path>
+        </svg>
+        <span>Reset</span>
+      </button>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="header-right">
+      <button class="btn" id="btn-open-guide" title="Quick Guide & Features Overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Guide</span>
+      </button>
+
+      <button class="btn btn-accent" id="btn-open-export" title="Export / Download Image (Ctrl+S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Export</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main class="app-body">
+    <!-- Left Primary Tool Strip -->
+    <nav class="primary-toolbar">
+      <button class="tool-tab-btn active" data-tool="enhance" title="Enhance & Color Adjustments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="21" x2="4" y2="14"></line>
+          <line x1="4" y1="10" x2="4" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12" y2="3"></line>
+          <line x1="20" y1="21" x2="20" y2="16"></line>
+          <line x1="20" y1="12" x2="20" y2="3"></line>
+          <line x1="1" y1="14" x2="7" y2="14"></line>
+          <line x1="9" y1="8" x2="15" y2="8"></line>
+          <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+        <span>Enhance</span>
+      </button>
+
+      <button class="tool-tab-btn" data-tool="crop" title="Crop, Rotate & Straighten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"></path>
+          <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"></path>
+        </svg>
+        <span>Crop</span>
+      </button>
+
+      <button class="tool-tab-btn" data-tool="cut" title="Cut, Erase & Isolate Objects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="3"></circle>
+          <circle cx="6" cy="18" r="3"></circle>
+          <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+          <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+          <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+        </svg>
+        <span>Cut</span>
+      </button>
+
+      <button class="tool-tab-btn" data-tool="filters" title="Creative Filter Looks & Presets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"></path>
+          <path d="m14 7 3 3"></path>
+          <path d="M5 6v4"></path>
+          <path d="M19 14v4"></path>
+        </svg>
+        <span>Presets</span>
+      </button>
+    </nav>
+
+    <!-- Tool Settings Drawer -->
+    <aside class="tool-drawer">
+      <!-- 1. ENHANCE DRAWER -->
+      <div class="drawer-panel" id="panel-enhance">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <span>Image Enhancement</span>
+          </div>
+          <button class="btn btn-icon" id="btn-reset-sliders" title="Reset all adjustment sliders">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 2v6h6"></path>
+              <path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="drawer-content">
+          <!-- Smart Auto Enhance -->
+          <button class="btn btn-primary" id="btn-auto-enhance" style="width: 100%; justify-content: center; padding: 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>✨ Smart Auto-Enhance</span>
+          </button>
+
+          <!-- Color Histogram -->
+          <div class="settings-section">
+            <span class="section-label">Color Histogram</span>
+            <div class="histogram-box">
+              <canvas id="histogram-canvas" width="256" height="85"></canvas>
+            </div>
+          </div>
+
+          <!-- Light Adjustments -->
+          <div class="settings-section">
+            <span class="section-label">Tone & Light</span>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Brightness</span>
+                <span class="slider-value" id="val-brightness">0</span>
+              </div>
+              <input type="range" id="slider-brightness" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Contrast</span>
+                <span class="slider-value" id="val-contrast">0</span>
+              </div>
+              <input type="range" id="slider-contrast" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Exposure</span>
+                <span class="slider-value" id="val-exposure">0</span>
+              </div>
+              <input type="range" id="slider-exposure" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Highlights</span>
+                <span class="slider-value" id="val-highlights">0</span>
+              </div>
+              <input type="range" id="slider-highlights" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Shadows</span>
+                <span class="slider-value" id="val-shadows">0</span>
+              </div>
+              <input type="range" id="slider-shadows" min="-100" max="100" value="0">
+            </div>
+          </div>
+
+          <!-- Color Adjustments -->
+          <div class="settings-section">
+            <span class="section-label">Color & Saturation</span>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Saturation</span>
+                <span class="slider-value" id="val-saturation">0</span>
+              </div>
+              <input type="range" id="slider-saturation" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Vibrance</span>
+                <span class="slider-value" id="val-vibrance">0</span>
+              </div>
+              <input type="range" id="slider-vibrance" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Warmth (Temperature)</span>
+                <span class="slider-value" id="val-temperature">0</span>
+              </div>
+              <input type="range" id="slider-temperature" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Tint</span>
+                <span class="slider-value" id="val-tint">0</span>
+              </div>
+              <input type="range" id="slider-tint" min="-100" max="100" value="0">
+            </div>
+          </div>
+
+          <!-- Detail & Effects -->
+          <div class="settings-section">
+            <span class="section-label">Details & Effects</span>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Sharpness</span>
+                <span class="slider-value" id="val-sharpness">0%</span>
+              </div>
+              <input type="range" id="slider-sharpness" min="0" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Blur</span>
+                <span class="slider-value" id="val-blur">0 px</span>
+              </div>
+              <input type="range" id="slider-blur" min="0" max="50" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Vignette</span>
+                <span class="slider-value" id="val-vignette">0%</span>
+              </div>
+              <input type="range" id="slider-vignette" min="0" max="100" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CROP & ROTATE DRAWER -->
+      <div class="drawer-panel" id="panel-crop" style="display: none;">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <span>Crop & Transform</span>
+          </div>
+        </div>
+
+        <div class="drawer-content">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" id="btn-apply-crop" style="flex: 1; justify-content: center;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Apply Crop</span>
+            </button>
+            <button class="btn" id="btn-cancel-crop" style="flex: 1; justify-content: center;">
+              <span>Cancel</span>
+            </button>
+          </div>
+
+          <div class="settings-section">
+            <span class="section-label">Aspect Ratio</span>
+            <div class="aspect-grid">
+              <button class="aspect-btn active" data-ratio="free">Freeform</button>
+              <button class="aspect-btn" data-ratio="1:1">1:1 Square</button>
+              <button class="aspect-btn" data-ratio="16:9">16:9 Wide</button>
+              <button class="aspect-btn" data-ratio="9:16">9:16 Reel</button>
+              <button class="aspect-btn" data-ratio="4:3">4:3 Photo</button>
+              <button class="aspect-btn" data-ratio="3:2">3:2 Film</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <span class="section-label">Rotate & Flip</span>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+              <button class="btn btn-icon" id="btn-rotate-ccw" title="Rotate 90° Left" style="width: 100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+              </button>
+              <button class="btn btn-icon" id="btn-rotate-cw" title="Rotate 90° Right" style="width: 100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+              </button>
+              <button class="btn btn-icon" id="btn-flip-h" title="Flip Horizontal" style="width: 100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"></path></svg>
+              </button>
+              <button class="btn btn-icon" id="btn-flip-v" title="Flip Vertical" style="width: 100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
+            💡 <strong>Quick Tip:</strong> Drag the crop handles to resize. Drag inside the box to reposition. Press <kbd>Enter</kbd> to apply.
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. CUT & ERASE DRAWER -->
+      <div class="drawer-panel" id="panel-cut" style="display: none;">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <span>Cut & Erase Tools</span>
+          </div>
+        </div>
+
+        <div class="drawer-content">
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-cutmode="brush">Brush</button>
+            <button class="sub-tab-btn" data-cutmode="rectangle">Box</button>
+            <button class="sub-tab-btn" data-cutmode="lasso">Lasso</button>
+          </div>
+
+          <div class="settings-section">
+            <span class="section-label">Cut Background Fill</span>
+            <select id="select-cut-bg" class="btn" style="width: 100%; padding: 7px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);">
+              <option value="transparent">Transparent (PNG)</option>
+              <option value="white">Solid White</option>
+              <option value="black">Solid Black</option>
+            </select>
+          </div>
+
+          <!-- Brush Options -->
+          <div id="cut-brush-settings" class="settings-section">
+            <span class="section-label">Eraser Brush Settings</span>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Brush Size</span>
+                <span class="slider-value" id="val-brush-size">35 px</span>
+              </div>
+              <input type="range" id="slider-brush-size" min="5" max="200" value="35">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Hardness</span>
+                <span class="slider-value" id="val-brush-hardness">80%</span>
+              </div>
+              <input type="range" id="slider-brush-hardness" min="0" max="100" value="80">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Opacity</span>
+                <span class="slider-value" id="val-brush-opacity">100%</span>
+              </div>
+              <input type="range" id="slider-brush-opacity" min="10" max="100" value="100">
+            </div>
+          </div>
+
+          <!-- Rectangle Options -->
+          <div id="cut-rect-settings" class="settings-section" style="display: none;">
+            <span class="section-label">Box Selection Cut</span>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Drag a box over the canvas, then choose an action:</p>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+              <button class="btn btn-danger" id="btn-cut-rect-erase" style="justify-content: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Erase Inside Box</span>
+              </button>
+              <button class="btn btn-primary" id="btn-cut-rect-isolate" style="justify-content: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                <span>Cut Out / Isolate Box</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Lasso Options -->
+          <div id="cut-lasso-settings" class="settings-section" style="display: none;">
+            <span class="section-label">Freehand Lasso Cut</span>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Draw around any object with your mouse:</p>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+              <button class="btn btn-danger" id="btn-cut-lasso-erase" style="justify-content: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Erase Inside Lasso</span>
+              </button>
+              <button class="btn btn-primary" id="btn-cut-lasso-isolate" style="justify-content: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                <span>Cut Out / Isolate Subject</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. FILTERS & PRESETS DRAWER -->
+      <div class="drawer-panel" id="panel-filters" style="display: none;">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <span>Filter Presets</span>
+          </div>
+        </div>
+
+        <div class="drawer-content">
+          <div class="presets-grid" id="presets-container"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Canvas Viewport -->
+    <section class="canvas-viewport" id="canvas-viewport">
+      <canvas id="main-canvas"></canvas>
+      <canvas id="overlay-canvas"></canvas>
+
+      <div class="drag-overlay" id="drag-overlay">
+        <span>Drop Image Here to Edit</span>
+      </div>
+
+      <!-- Floating Zoom Controls -->
+      <div class="floating-zoom-bar">
+        <button class="btn btn-icon" id="btn-zoom-out" title="Zoom Out (-)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <span class="zoom-label" id="zoom-percentage">100%</span>
+        <button class="btn btn-icon" id="btn-zoom-in" title="Zoom In (+)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="btn btn-icon" id="btn-zoom-fit" title="Fit to Screen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+        </button>
+        <button class="btn btn-icon" id="btn-zoom-100" title="100% Actual Size">
+          <span style="font-size: 0.75rem; font-weight: 700;">1:1</span>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <h2 class="empty-title">Drop an image here or open a file</h2>
+        <p class="empty-desc">Quickly crop to custom aspect ratios, cut & erase objects or backgrounds, and enhance color, clarity, and lighting.</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary" id="btn-empty-open">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Choose Image</span>
+          </button>
+          <button class="btn" id="btn-empty-sample">
+            <span>Try Mountain Sunset</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Status Bar -->
+  <footer class="status-bar">
+    <div class="status-left">
+      <div class="status-item" id="status-dimensions">
+        <span>No image loaded</span>
+      </div>
+      <div class="status-item" id="status-history">
+        <span>Ready</span>
+      </div>
+    </div>
+
+    <div class="status-right">
+      <div class="status-item" id="status-pixel">
+        <span class="color-chip" id="pixel-color-chip"></span>
+        <span id="pixel-coords">--</span>
+      </div>
+      <div class="status-item">
+        <span>💡 Hold Space to Pan • Scroll to Zoom</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Welcome / Completion Popup Modal -->
+  <div class="modal-backdrop open" id="welcome-modal">
+    <div class="modal-card" style="width: 500px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="/affanverse-logo.jpg" alt="AffanVerse Logo" class="modal-logo-img">
+          <div>
+            <h3 class="modal-title">AffanVerse Photo Editor</h3>
+            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">All tools compiled, optimized, and ready to edit</p>
+          </div>
+        </div>
+        <button class="btn btn-icon" id="btn-close-welcome">✕</button>
+      </div>
+
+      <div class="modal-body" style="gap: 14px;">
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #38bdf8;">✂️ Crop & Transform:</strong>
+            <span style="color: var(--text-secondary);">8 resize handles, 1:1, 16:9, 9:16, 4:3, 90° CW/CCW, and Flips</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #38bdf8;">🪄 Cut & Erase:</strong>
+            <span style="color: var(--text-secondary);">Brush eraser, box cutout, and freehand lasso with transparency</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #38bdf8;">✨ Smart Enhance:</strong>
+            <span style="color: var(--text-secondary);">1-click Auto-Enhance, real-time RGB histogram, and 10 film presets</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #38bdf8;">🚀 Scalable Performance:</strong>
+            <span style="color: var(--text-secondary);">High-res engine with 60fps real-time preview acceleration</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <span class="section-label">Keyboard Shortcuts Cheat Sheet</span>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.78rem; color: var(--text-secondary);">
+            <div><kbd>Space + Drag</kbd> Pan canvas</div>
+            <div><kbd>Mouse Scroll</kbd> Zoom in/out</div>
+            <div><kbd>Ctrl + Z</kbd> Undo</div>
+            <div><kbd>Ctrl + Y</kbd> Redo</div>
+            <div><kbd>Ctrl + O</kbd> Open file</div>
+            <div><kbd>Ctrl + S</kbd> Export image</div>
+            <div><kbd>Enter</kbd> Apply crop</div>
+            <div><kbd>Esc</kbd> Cancel crop</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-primary" id="btn-start-editing" style="padding: 8px 18px;">
+          <span>🚀 Start Editing</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal Dialog -->
+  <div class="modal-backdrop" id="export-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Edited Image</h3>
+        <button class="btn btn-icon" id="btn-close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="settings-section">
+          <span class="section-label">File Format</span>
+          <div class="btn-group" style="width: 100%;">
+            <button class="btn active" data-exportformat="image/png" style="flex: 1;">PNG (Lossless)</button>
+            <button class="btn" data-exportformat="image/jpeg" style="flex: 1;">JPEG</button>
+            <button class="btn" data-exportformat="image/webp" style="flex: 1;">WEBP</button>
+          </div>
+        </div>
+
+        <div class="settings-section" id="export-quality-container" style="display: none;">
+          <div class="slider-label-row">
+            <span>Compression Quality</span>
+            <span class="slider-value" id="val-export-quality">92%</span>
+          </div>
+          <input type="range" id="slider-export-quality" min="10" max="100" value="92">
+        </div>
+
+        <div class="settings-section">
+          <span class="section-label">Resolution Scale</span>
+          <div class="btn-group" style="width: 100%;">
+            <button class="btn" data-exportscale="0.5" style="flex: 1;">0.5x Half</button>
+            <button class="btn active" data-exportscale="1" style="flex: 1;">1x Original</button>
+            <button class="btn" data-exportscale="2" style="flex: 1;">2x Ultra</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <span class="section-label">Output Dimensions</span>
+          <div style="font-size: 0.9rem; font-weight: 600; color: #fff;" id="export-resolution-info">
+            1920 × 1080 px
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" id="btn-copy-clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span>Copy to Clipboard</span>
+        </button>
+        <button class="btn btn-primary" id="btn-download-image">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Download File</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript Module -->
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
