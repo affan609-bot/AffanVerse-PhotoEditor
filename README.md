@@ -1,5 +1,8 @@
 # 🎨 AffanVerse Photo Editor
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/affanverse-photoeditor/deploy-status)](https://affanverse-photoeditor.netlify.app/)
+**Live App:** [https://affanverse-photoeditor.netlify.app/](https://affanverse-photoeditor.netlify.app/)
+
 A modern, high-performance, and responsive Web Photo Editor built for precision cropping, cutting/erasing, and intelligent photo enhancement.
 
 ![AffanVerse Logo](public/affanverse-logo.jpg)
